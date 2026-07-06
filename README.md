@@ -1,8 +1,15 @@
 # multiROCplot
 
+[![Launch app](https://img.shields.io/badge/Shiny-launch%20app-2c3e50?logo=r)](https://junjiepeng-5h1ny.shinyapps.io/multiROCplot/)
 [![DOI](https://zenodo.org/badge/817356264.svg)](https://doi.org/10.5281/zenodo.21226310)
 
 **An R/Shiny app for plotting and comparing multiple ROC curves, with companion group-comparison statistics and boxplots.**
+
+## ▶ Use it online (no installation)
+
+**[Launch multiROCplot →](https://junjiepeng-5h1ny.shinyapps.io/multiROCplot/)**
+
+The easiest way to use multiROCplot is the hosted app — just open the link, upload your data, and go. Nothing to install. Everything below (local install, the function API) is for users who want to run it offline, script it, or build on it.
 
 `multiROCplot` is an interactive tool for exploratory diagnostic-accuracy analysis. You upload a table of predictors and a binary outcome, and the app fits per-variable logistic models, draws overlaid ROC curves with AUCs, computes univariate group-comparison tests, and renders publication-style boxplots — all exportable as figures and CSVs. It is aimed at biostatisticians, bioinformaticians, and clinical/translational researchers who want to screen candidate biomarkers quickly without writing analysis code each time.
 
@@ -33,32 +40,50 @@ By default the first five numeric columns are pre-selected as predictors; you ca
 
 > **Note:** This repository ships **no example data**. Use your own dataset. Do not commit real patient data to the repository.
 
-## Installation
+## Run locally (optional)
 
-The app requires R (≥ 4.1 recommended) and the packages below. Install them from CRAN:
-
-```r
-install.packages(c(
-  "shiny", "bslib", "dplyr", "tidyr", "ggplot2",
-  "ggprism", "pROC", "readxl", "readr", "zip"
-))
-```
-
-## Usage
-
-From the repository root:
+If you prefer to run the app offline or on sensitive data that shouldn't leave
+your machine, install the package from GitHub (R ≥ 4.1; dependencies install
+automatically) and launch it locally:
 
 ```r
-shiny::runApp("app.R")
+# install.packages("remotes")
+remotes::install_github("JunjiePeng/multiROCplot")
+
+multiROCplot::run_app()
 ```
 
-or open `app.R` in RStudio and click **Run App**. Then:
+The local app is identical to the hosted one. Once it's running:
 
 1. Upload a data file.
 2. Select the binary outcome/group column.
 3. Select predictor variables (first five numeric columns are pre-selected).
 4. Choose the per-variable test and whether to FDR-adjust.
 5. Click **Run analysis**, review the **ROC**, **Stats**, and **Boxplots** tabs, and export as needed.
+
+### Programmatic API
+
+The same logic that powers the app is exported, so you can script analyses or
+build them into reproducible pipelines:
+
+```r
+library(multiROCplot)
+
+df <- read_data("my_data.xlsx", ext = "xlsx")
+df$outcome <- coerce_binary_group(df$outcome)
+
+vars <- c("marker1", "marker2", "marker3")
+
+stats_tbl <- compute_univariate_tests(df, "outcome", vars, test = "wilcox")
+roc_tbl   <- compute_roc_table(df, "outcome", vars)
+
+roc_plot  <- plot_roc_curves(df, "outcome", vars)
+box_plot  <- plot_group_boxplots(df, "outcome", vars, p_tbl = stats_tbl)
+```
+
+Exported functions: `read_data()`, `coerce_binary_group()`,
+`compute_univariate_tests()`, `compute_roc_table()`, `roc_from_predictor()`,
+`roc_combined()`, `plot_roc_curves()`, `plot_group_boxplots()`, `run_app()`.
 
 ## Dependencies and licensing rationale
 
@@ -77,9 +102,41 @@ or open `app.R` in RStudio and click **Run App**. Then:
 
 Because the app depends on `shiny` (GPL-3) as well as `pROC` and `ggprism` (GPL ≥ 3), the combined distributed work is licensed under **GPL-3**. The permissive (MIT) dependencies are compatible with, and combine into, a GPL-3 work.
 
-## Roadmap
+## Package structure
 
-This repository is the archived, citable form of the application. A planned next step is to refactor the ROC-fitting, AUC, and plotting logic out of the Shiny server into a standalone, documented, and tested R package, with the Shiny app becoming a thin UI layer on top of that package API. A first-draft `DESCRIPTION` is included to support that transition.
+The ROC/statistics/plotting logic lives in `R/` as documented, tested,
+exported functions. The Shiny app (`inst/shiny-app/app.R`) is a thin UI layer
+that calls those same functions, so the interactive tool and the programmatic
+API share a single implementation.
+
+```
+multiROCplot/
+├── DESCRIPTION            # package metadata, dependencies, GPL-3
+├── NAMESPACE              # exports (regenerate with devtools::document())
+├── R/
+│   ├── data-io.R          # read_data(), coerce_binary_group()
+│   ├── stats.R            # compute_univariate_tests()
+│   ├── roc.R              # roc_from_predictor(), roc_combined(), compute_roc_table()
+│   ├── plots.R            # plot_roc_curves(), plot_group_boxplots()
+│   └── run_app.R          # run_app()
+├── inst/shiny-app/app.R   # thin Shiny UI over the package API
+├── tests/testthat/        # unit tests (synthetic data only)
+├── app.R                  # deployment entry point (shinyapps.io); not built into the package
+├── CITATION.cff           # citation metadata + Zenodo DOI
+└── LICENSE                # GPL-3
+```
+
+## Development
+
+`man/` documentation is generated from the roxygen comments in `R/`. After
+cloning, regenerate docs and run the checks:
+
+```r
+# install.packages("devtools")
+devtools::document()   # regenerate NAMESPACE + man/
+devtools::test()       # run the testthat suite
+devtools::check()      # full R CMD check
+```
 
 ## Citing this software
 

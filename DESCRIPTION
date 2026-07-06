@@ -15,20 +15,28 @@ Description: An interactive Shiny application and supporting functions for
     and produces annotated boxplots, with export of figures and results.
 License: GPL-3
 Encoding: UTF-8
-URL: https://github.com/JunjiePeng/multiROCplot
+URL: https://junjiepeng-5h1ny.shinyapps.io/multiROCplot/, https://github.com/JunjiePeng/multiROCplot
 BugReports: https://github.com/JunjiePeng/multiROCplot/issues
 Depends:
     R (>= 4.1)
 Imports:
-    shiny,
     bslib,
     dplyr,
-    tidyr,
     ggplot2,
     ggprism,
     pROC,
-    readxl,
     readr,
+    readxl,
+    rlang,
+    shiny,
+    stats,
+    tibble,
+    tidyr,
+    tools,
+    utils,
     zip
+Suggests:
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2

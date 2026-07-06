@@ -15,6 +15,7 @@ authors:
     orcid: "https://orcid.org/0000-0002-3532-8431"
 version: "1.2.0"
 doi: "10.5281/zenodo.21226310"
+url: "https://junjiepeng-5h1ny.shinyapps.io/multiROCplot/"
 license: "GPL-3.0"
 repository-code: "https://github.com/JunjiePeng/multiROCplot"
 identifiers:
